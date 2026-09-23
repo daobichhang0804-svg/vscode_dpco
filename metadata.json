@@ -1,0 +1,8 @@
+{
+  "name": "Vật Tư Phòng Sạch",
+  "description": "Công ty cung cấp thiết bị và vật tư phòng sạch, giải pháp công nghiệp tiêu chuẩn cao.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

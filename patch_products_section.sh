@@ -1,0 +1,3 @@
+sed -i "s/const brands = useMemo(() => Array.from(new Set(PRODUCTS.map(p => p.brand))), \[\]);/const brands = ['Suzuki Latex', 'Riverstone', 'Khác'];/g" src/components/ProductsSection.tsx
+sed -i "s/const sizes = useMemo(() => Array.from(new Set(PRODUCTS.map(p => p.specs.size).filter(Boolean) as string\[\])), \[\]);/const sizes = ['S 15mm', 'M 18mm', 'L 21mm'];/g" src/components/ProductsSection.tsx
+sed -i "s/const matchSize = selectedSizes.length === 0 || (p.specs.size && selectedSizes.includes(p.specs.size));/const matchSize = selectedSizes.length === 0 || (p.specs.size \&\& selectedSizes.some(s => p.specs.size?.includes(s)));/g" src/components/ProductsSection.tsx
