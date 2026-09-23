@@ -8,7 +8,7 @@ export default function Footer() {
       
       {/* Circle Logo overlapping top */}
       <div className="absolute left-1/2 -top-16 -translate-x-1/2 w-32 h-32 bg-brand-green rounded-full flex items-center justify-center p-[15%] shadow-[0_-8px_15px_-3px_rgba(0,0,0,0.1)] z-10">
-        <img src="https://ybitklruurxnuoyzusdp.supabase.co/storage/v1/object/public/brand-assets/logo_image_bg_removed.png" alt="Logo" className="w-full h-full object-contain filter drop-shadow-md" />
+        <img src="https://ybitklruurxnuoyzusdp.supabase.co/storage/v1/object/public/brand-assets/logo_image_bg%20removed.png" alt="Logo" className="w-full h-full object-contain filter drop-shadow-md" />
       </div>
 
       <div className="mx-auto max-w-[1400px] px-6 lg:px-12 relative z-10">
