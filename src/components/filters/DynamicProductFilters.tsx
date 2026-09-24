@@ -240,7 +240,7 @@ export default function DynamicProductFilters({
                   <input
                     type="radio"
                     name="product-category"
-                    checked={isSelected}
+                      checked={!!isSelected}
                     onChange={() => onCategoryChange(cat.name)}
                     className="h-4 w-4 border-zinc-300 text-brand-green focus:ring-brand-green cursor-pointer"
                   />
@@ -277,16 +277,7 @@ export default function DynamicProductFilters({
             Danh mục này chưa cấu hình thuộc tính kỹ thuật.
           </p>
         </div>
-      ) : (
-        <div className="p-4 bg-emerald-50/50 rounded-lg border border-emerald-100 text-left">
-          <p className="text-xs text-emerald-800 font-medium mb-1">
-            Chọn một danh mục cụ thể
-          </p>
-          <p className="text-[11px] text-emerald-600/90 leading-relaxed">
-            Hệ thống sẽ tự động hiển thị các bộ lọc thông số kỹ thuật đặc thù riêng cho từng ngành hàng.
-          </p>
-        </div>
-      )}
-    </div>
+    ) : null}
+  </div>
   );
 }

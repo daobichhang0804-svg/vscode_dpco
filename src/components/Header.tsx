@@ -51,7 +51,7 @@ export default function Header({ cartItemCount, onOpenCart, onOpenQuote }: Heade
         
         {/* Logo */}
         <Link to="/" className="flex items-center flex-shrink-0 mr-8">
-          <img src="https://ybitklruurxnuoyzusdp.supabase.co/storage/v1/object/public/brand-assets/logo_image_bg%20removed.png" alt="Đức Phong Logo" className="h-[40px] w-auto object-contain" onError={(e) => {
+          <img src="https://ybitklruurxnuoyzusdp.supabase.co/storage/v1/object/public/brand-assets/logo_image_bg%20removed.png" alt="Đức Phong brand logo: an abstract green leaf-like emblem surrounded by a bright yellow rounded shape on a transparent background; no text appears in the emblem" className="h-[40px] w-auto object-contain" onError={(e) => {
             // Fallback if image not uploaded yet
             e.currentTarget.style.display = 'none';
             e.currentTarget.nextElementSibling?.classList.remove('hidden');

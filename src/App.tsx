@@ -1,5 +1,4 @@
 // The router dependency is provided at runtime by the application host.
-// @ts-expect-error The local type checker may not have the dependency's type declarations.
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Home from './pages/Home';
@@ -11,8 +10,21 @@ import Compare from './pages/Compare';
 import AdminCertificates from './pages/AdminCertificates';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { ProductsProvider } from './contexts/ProductsContext';
+import { useEffect } from 'react';
 
 export default function App() {
+
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.rel = 'icon';
+    link.href = '/favicon.svg';
+    document.head.appendChild(link);
+
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, []);
+
   return (
     <LanguageProvider>
       <ProductsProvider>
@@ -35,5 +47,3 @@ export default function App() {
     </LanguageProvider>
   );
 }
-
-
