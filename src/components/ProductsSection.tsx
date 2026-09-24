@@ -15,6 +15,7 @@ import {
 import { doesProductMatchFilters } from './filters/DynamicProductFilters';
 import { SelectedFiltersState } from '../types/filter';
 import { ArrowUpDown, RefreshCw } from 'lucide-react';
+import { toSlug } from '../utils';
 
 interface ProductsSectionProps {
   onAddToCart: (product: Product) => void;
@@ -31,13 +32,19 @@ export default function ProductsSection({
   const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useLanguage();
 
-  // Read initial category and filter state from URL
-  const initialCategoryParam = searchParams.get('category');
-  const matchedInitialCat = findCategoryDefinition(initialCategoryParam);
-  
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    matchedInitialCat ? matchedInitialCat.name : (initialCategoryParam || null)
-  );
+  // Read initial category and filter state from URL const initialCategoryParam = searchParams.get('category');
+const initialCategoryParam = searchParams.get('category');
+const matchedInitialCat = findCategoryDefinition(initialCategoryParam);
+
+const resolveCategoryFromSlug = (slug: string | null): string | null => {
+  if (!slug) return null;
+  const found = products.find(p => p.category && toSlug(p.category) === slug);
+  return found ? found.category : slug;
+};
+
+const [selectedCategory, setSelectedCategory] = useState<string | null>(
+  matchedInitialCat ? matchedInitialCat.name : resolveCategoryFromSlug(initialCategoryParam)
+);
 
   const [selectedFilters, setSelectedFilters] = useState<SelectedFiltersState>(() => {
     const initialFilters: SelectedFiltersState = {};
@@ -65,9 +72,9 @@ export default function ProductsSection({
     const params = new URLSearchParams();
 
     if (newCategory) {
-      const catDef = findCategoryDefinition(newCategory);
-      params.set('category', catDef ? catDef.slug : newCategory);
-    }
+  const catDef = findCategoryDefinition(newCategory);
+  params.set('category', catDef ? catDef.slug : toSlug(newCategory));
+}
 
     Object.entries(newFilters).forEach(([attrId, values]) => {
       if (values && values.length > 0) {
