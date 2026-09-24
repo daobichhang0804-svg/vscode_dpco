@@ -404,7 +404,7 @@ NGUYÊN TẮC CỐT LÕI VỀ NGUỒN THÔNG TIN:
 5. ĐIỀU HƯỚNG WEBSITE (Actionable CTAs):
    - Thay vì chỉ nói "bạn có thể vào trang...", hãy gọi tool hoặc cung cấp đường dẫn chính xác:
      * Trang chi tiết sản phẩm: /product/{id}
-     * Trang lọc danh mục: /products?category={slug}&{filter}={val}
+    * Trang lọc danh mục: /collections/{slug}?{filter}={val}&{filter2}={val2}
      * Trang so sánh: /compare
      * Trang liên hệ báo giá: /contact
 6. PHONG CÁCH GIAO TIẾP:

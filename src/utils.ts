@@ -17,3 +17,15 @@ export function convertDriveUrl(driveUrl: string): string {
 
   return driveUrl;
 }
+
+export function toSlug(str: string): string {
+  return str
+    .normalize('NFD')                    // tách chữ và dấu
+    .replace(/[\u0300-\u036f]/g, '')     // bỏ dấu
+    .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')        // bỏ ký tự lạ
+    .replace(/\s+/g, '-')                // khoảng trắng → gạch ngang
+    .replace(/-+/g, '-');                // gộp gạch ngang liên tiếp
+}

@@ -1,5 +1,5 @@
 // The router dependency is provided at runtime by the application host.
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import Catalog from './pages/Catalog';
@@ -11,6 +11,12 @@ import AdminCertificates from './pages/AdminCertificates';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { ProductsProvider } from './contexts/ProductsContext';
 import { useEffect } from 'react';
+
+// Chuyển hướng link cũ dạng /product/xxx sang /products/xxx
+function RedirectToNewProduct() {
+  const { id } = useParams();
+  return <Navigate to={`/products/${id}`} replace />;
+}
 
 export default function App() {
 
@@ -32,8 +38,13 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
-              <Route path="products" element={<Catalog />} />
-              <Route path="product/:id" element={<ProductDetail />} />
+              <Route path="collections" element={<Navigate to="/collections/all" replace />} />
+              <Route path="collections/:collectionSlug" element={<Catalog />} />
+              {/* Link cũ /products (không có slug) -> chuyển sang trang tất cả sản phẩm */}
+              <Route path="products" element={<Navigate to="/collections/all" replace />} />
+              <Route path="products/:id" element={<ProductDetail />} />
+              {/* Link cũ /product/:id -> tự chuyển sang /products/:id */}
+              <Route path="product/:id" element={<RedirectToNewProduct />} />
               <Route path="compare" element={<Compare />} />
               <Route path="blog" element={<Blog />} />
               <Route path="contact" element={<Contact />} />

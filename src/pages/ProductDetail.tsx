@@ -67,7 +67,7 @@ export default function ProductDetail() {
       {/* BREADCRUMB */}
       <div className="py-6 border-b border-zinc-200 text-[11px] font-bold uppercase tracking-widest text-zinc-400 mb-12 flex items-center gap-3 container">
         <Link to="/" className="hover:text-brand-green transition-colors">{t('header.home')}</Link> <span className="text-zinc-300">/</span>
-        <Link to="/products" className="hover:text-brand-green transition-colors">{product.category}</Link> <span className="text-zinc-300">/</span>
+        <Link to="/collections/all" className="hover:text-brand-green transition-colors">{product.category}</Link> <span className="text-zinc-300">/</span>
         <span className="text-zinc-900">{product.name}</span>
       </div>
 

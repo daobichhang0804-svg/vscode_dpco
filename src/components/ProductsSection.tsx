@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Product } from '../types';
 import { useProducts } from '../contexts/ProductsContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -14,42 +14,50 @@ import {
 } from '../data/categorySchema';
 import { doesProductMatchFilters } from './filters/DynamicProductFilters';
 import { SelectedFiltersState } from '../types/filter';
-import { ArrowUpDown, RefreshCw } from 'lucide-react';
 import { toSlug } from '../utils';
+import { ArrowUpDown, RefreshCw } from 'lucide-react';
 
 interface ProductsSectionProps {
   onAddToCart: (product: Product) => void;
   onCompare: (product: Product) => void;
   compareList: Product[];
+  /** Slug lấy từ URL /collections/:collectionSlug — 'all' nghĩa là không lọc category */
+  collectionSlug: string;
 }
 
 export default function ProductsSection({ 
   onAddToCart, 
   onCompare, 
-  compareList 
+  compareList,
+  collectionSlug
 }: ProductsSectionProps) {
   const { products, loading, refreshProducts } = useProducts();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { t } = useLanguage();
 
-  // Read initial category and filter state from URL const initialCategoryParam = searchParams.get('category');
-const initialCategoryParam = searchParams.get('category');
-const matchedInitialCat = findCategoryDefinition(initialCategoryParam);
+  // Chuyển slug trong URL -> tên category thật (khớp theo schema, hoặc theo dữ liệu sản phẩm)
+  const resolveCategoryFromSlug = useCallback((slug: string): string | null => {
+    if (!slug || slug === 'all') return null;
+    const catDef = findCategoryDefinition(slug);
+    if (catDef) return catDef.name;
+    const found = products.find(p => p.category && toSlug(p.category) === slug);
+    return found ? found.category : slug;
+  }, [products]);
 
-const resolveCategoryFromSlug = (slug: string | null): string | null => {
-  if (!slug) return null;
-  const found = products.find(p => p.category && toSlug(p.category) === slug);
-  return found ? found.category : slug;
-};
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(
+    resolveCategoryFromSlug(collectionSlug)
+  );
 
-const [selectedCategory, setSelectedCategory] = useState<string | null>(
-  matchedInitialCat ? matchedInitialCat.name : resolveCategoryFromSlug(initialCategoryParam)
-);
+  // Khi URL (collectionSlug) đổi từ bên ngoài (vd bấm link, back/forward), đồng bộ lại state
+  useEffect(() => {
+    setSelectedCategory(resolveCategoryFromSlug(collectionSlug));
+  }, [collectionSlug, resolveCategoryFromSlug]);
 
   const [selectedFilters, setSelectedFilters] = useState<SelectedFiltersState>(() => {
     const initialFilters: SelectedFiltersState = {};
-    const cat = findCategoryDefinition(initialCategoryParam);
-    const attrs = getCategoryAttributes(cat?.id || initialCategoryParam);
+    const cat = findCategoryDefinition(resolveCategoryFromSlug(collectionSlug));
+    const attrs = getCategoryAttributes(cat?.id || resolveCategoryFromSlug(collectionSlug));
 
     attrs.forEach(attr => {
       const paramVal = searchParams.get(attr.id);
@@ -67,42 +75,42 @@ const [selectedCategory, setSelectedCategory] = useState<string | null>(
     return getCategoryAttributes(selectedCategory);
   }, [selectedCategory]);
 
-  // Synchronize URL parameters whenever selectedCategory or selectedFilters change
-  const updateUrlParams = useCallback((newCategory: string | null, newFilters: SelectedFiltersState) => {
+  // Ghi các bộ lọc thuộc tính (không phải category) vào query string, giữ nguyên path hiện tại
+  const updateFilterParams = useCallback((newFilters: SelectedFiltersState) => {
     const params = new URLSearchParams();
-
-    if (newCategory) {
-  const catDef = findCategoryDefinition(newCategory);
-  params.set('category', catDef ? catDef.slug : toSlug(newCategory));
-}
-
     Object.entries(newFilters).forEach(([attrId, values]) => {
       if (values && values.length > 0) {
         params.set(attrId, values.join(','));
       }
     });
-
     setSearchParams(params, { replace: true });
   }, [setSearchParams]);
 
-  // Handle category change: clear invalid filters & switch schema dynamically
+  // Handle category change: điều hướng sang path /collections/:slug mới, giữ nguyên các filter thuộc tính hợp lệ
   const handleCategoryChange = (category: string | null) => {
     setSelectedCategory(category);
-    
-    // When changing category: remove filters that are not valid for the new category
+
     const newCategoryAttrs = getCategoryAttributes(category);
     const validAttrIds = new Set(newCategoryAttrs.map(a => a.id));
 
-    setSelectedFilters(prev => {
-      const pruned: SelectedFiltersState = {};
-      for (const attrId of Object.keys(prev)) {
-        if (validAttrIds.has(attrId) && prev[attrId]) {
-          pruned[attrId] = prev[attrId];
-        }
+    const pruned: SelectedFiltersState = {};
+    for (const attrId of Object.keys(selectedFilters)) {
+      if (validAttrIds.has(attrId) && selectedFilters[attrId]) {
+        pruned[attrId] = selectedFilters[attrId];
       }
-      updateUrlParams(category, pruned);
-      return pruned;
+    }
+    setSelectedFilters(pruned);
+
+    const catDef = findCategoryDefinition(category);
+    const slug = category ? (catDef ? catDef.slug : toSlug(category)) : 'all';
+
+    const qs = new URLSearchParams();
+    Object.entries(pruned).forEach(([attrId, values]) => {
+      if (values && values.length > 0) qs.set(attrId, values.join(','));
     });
+    const qsString = qs.toString();
+
+    navigate(`/collections/${slug}${qsString ? `?${qsString}` : ''}`, { replace: true });
   };
 
   // Toggle single filter option value
@@ -120,7 +128,7 @@ const [selectedCategory, setSelectedCategory] = useState<string | null>(
         newState[attributeId] = updated;
       }
 
-      updateUrlParams(selectedCategory, newState);
+      updateFilterParams(newState);
       return newState;
     });
   };
@@ -129,7 +137,7 @@ const [selectedCategory, setSelectedCategory] = useState<string | null>(
   const handleClearAll = () => {
     const emptyFilters: SelectedFiltersState = {};
     setSelectedFilters(emptyFilters);
-    updateUrlParams(selectedCategory, emptyFilters);
+    updateFilterParams(emptyFilters);
   };
 
   // 1. Filter by Category

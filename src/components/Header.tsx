@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import SearchDropdown from './SearchDropdown';
+import { toSlug } from '../utils';
 
 interface HeaderProps {
   cartItemCount: number;
@@ -100,9 +101,9 @@ export default function Header({ cartItemCount, onOpenCart, onOpenQuote }: Heade
             {/* Mega Menu Placeholder */}
             <div className="absolute top-full left-1/2 -translate-x-1/2 mt-0 pt-4 w-64 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
               <div className="bg-white rounded-lg shadow-xl border border-zinc-100 p-4 flex flex-col gap-2">
-                <Link to={`/products?category=${encodeURIComponent('Bao ngón tay cao su')}`} className="text-sm text-zinc-600 hover:text-brand-green hover:bg-zinc-50 px-3 py-2 rounded">{t('header.finger_cots')}</Link>
-                <Link to={`/products?category=${encodeURIComponent('Găng tay nitrile phòng sạch')}`} className="text-sm text-zinc-600 hover:text-brand-green hover:bg-zinc-50 px-3 py-2 rounded">{t('header.nitrile_gloves')}</Link>
-                <Link to={`/products?category=${encodeURIComponent('Trục cơ khí chính xác')}`} className="text-sm text-zinc-600 hover:text-brand-green hover:bg-zinc-50 px-3 py-2 rounded">{t('header.mechanical_shaft')}</Link>
+                <Link to={`/collections/${toSlug('Bao ngón tay cao su')}`} className="text...">Bao ngón tay cao su</Link>
+                <Link to={`/collections/${toSlug('Găng tay nitrile phòng sạch')}`} className="text...">Găng tay nitrile phòng sạch</Link>
+                <Link to={`/collections/${toSlug('Trục cơ khí chính xác')}`} className="text...">Trục cơ khí chính xác</Link>
               </div>
             </div>
           </div>

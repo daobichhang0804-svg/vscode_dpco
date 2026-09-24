@@ -109,7 +109,7 @@ export default function Home() {
             suffix={t('home.stat.plus')}
             desc={t('home.customers.desc')}
             bgImage="https://images.unsplash.com/photo-1586528116311-ad8ed7c1590f?auto=format&fit=crop&w=1200&q=80"
-            linkTo="/blog?category=market"
+            linkTo="/blog/collections/${toSlug(category)}market"
           />
           <AnimatedStat 
             title={t('home.supply')}
@@ -117,7 +117,7 @@ export default function Home() {
             suffix={t('home.stat.million')}
             desc={t('home.supply.desc')}
             bgImage="https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=1200&q=80"
-            linkTo="/blog?category=supply-chain"
+            linkTo="/blog/collections/${toSlug(category)}supply-chain"
           />
           <AnimatedStat 
             title={t('home.experience')}

@@ -1,4 +1,4 @@
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useParams } from 'react-router-dom';
 import ProductsSection from '../components/ProductsSection';
 import { Product } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -6,6 +6,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 export default function Catalog() {
   const { handleAddToCart, handleCompare, compareList } = useOutletContext<any>();
   const { t } = useLanguage();
+  const { collectionSlug } = useParams();
 
   return (
     <div className="bg-transparent">
@@ -26,6 +27,7 @@ export default function Catalog() {
         onAddToCart={handleAddToCart}
         onCompare={handleCompare}
         compareList={compareList}
+        collectionSlug={collectionSlug || 'all'}
       />
     </div>
   );
