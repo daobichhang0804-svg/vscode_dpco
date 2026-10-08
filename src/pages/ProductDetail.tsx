@@ -19,11 +19,33 @@ export default function ProductDetail() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const mainImage = selectedImage || product?.image;
 
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const sizeOptions = product.specs.size
-    ? product.specs.size.split('-').map(s => s.trim()).filter(Boolean)
-    : ['S 15mm'];
-  const activeSize = selectedSize || sizeOptions[0];
+const [selectedSize, setSelectedSize] = useState<string | null>(null);
+
+const FINGER_COT_SIZES: Record<string, string[]> = {
+  'Spore Ordinary': ['S 15mm', 'M 18mm', 'L 20mm'],
+  'Spore Clean': ['S 15mm', 'M 18mm', 'L 20mm'],
+  'Spore Chlorinated': ['S 15mm', 'M 18mm', 'L 20mm'],
+  'Spore Lite II Ordinary': ['S 15mm', 'M 18mm', 'L 20mm'],
+  'Spore Lite II Clean': ['S 15mm', 'M 18mm', 'L 20mm'],
+  'Spore Lite II Chlorinated': ['S 15mm', 'M 18mm', 'L 20mm'],
+  'Spore Black Clean': ['S 15mm', 'M 18mm', 'L 20mm'],
+  'Spore Black Chlorinated': ['S 15mm', 'M 18mm', 'L 20mm'],
+  'Spore Black E9 Chlorinated': ['S 15mm', 'M 18mm', 'L 20mm'],
+  'Spore Sulphur Free': ['S 15mm', 'M 18mm', 'L 20mm'],
+  'Spore Pink AS Chlorinated': ['S 15mm', 'M 18mm', 'L 20mm'],
+  'Mask Orange': ['S 15mm', 'M 18mm', 'L 20mm'],
+  'Mask Black': ['S 15mm', 'M 18mm', 'L 20mm'],
+
+  'Shield': ['M 15mm', 'L 19mm'],
+  'EDEL EX': ['M 15mm', 'L 19mm'],
+
+  'EDEL II': ['S 15mm', 'SM 16.5mm', 'M 18mm', 'L 21mm'],
+};
+
+const sizeOptions =
+  FINGER_COT_SIZES[product.name] || [];
+
+const activeSize = selectedSize || sizeOptions[0];
 
   useEffect(() => {
     setSelectedImage(null);

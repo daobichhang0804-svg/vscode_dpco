@@ -14,6 +14,26 @@ import {
 } from '../../data/categorySchema';
 import FilterGroup from './FilterGroup';
 
+const SIZE_PREFIX = /^(xxs|xs|s|sm|m|ml|l|xl|xxl)\s*(\d)/i;
+
+/** "l21 mm" -> "L 21mm", "L  21 mm" -> "L 21mm" */
+export function normalizeValue(v: string): string {
+  return v
+    .replace(/\s+/g, ' ')
+    .replace(/(\d)\s+(mm|cm)\b/gi, (_, d, u) => `${d}${u.toLowerCase()}`)
+    .replace(SIZE_PREFIX, (_, l, d) => `${l.toUpperCase()} ${d}`)
+    .trim();
+}
+
+/** Tách chuỗi gộp "S 15mm – M 18mm | L 20mm" thành từng giá trị đã chuẩn hóa */
+export function splitValues(raw: unknown): string[] {
+  if (raw === null || raw === undefined) return [];
+  return String(raw)
+    .split(/\s*\|\s*|\s*,\s+|\s*;\s*|\s+[-–—]\s+/)
+    .map(normalizeValue)
+    .filter(Boolean);
+}
+
 interface DynamicProductFiltersProps {
   category: string | null;
   products: Product[];
@@ -29,36 +49,18 @@ interface DynamicProductFiltersProps {
  * Normalizes and checks if a product matches a specific attribute value.
  */
 export function doesProductMatchAttributeValue(
-  product: Product, 
-  attr: CategoryAttribute, 
+  product: Product,
+  attr: CategoryAttribute,
   targetValue: string
 ): boolean {
-  const targetLower = targetValue.toLowerCase().trim();
-  const rawValue = attr.isSpec 
-    ? (product.specs as any)?.[attr.id] 
+  const rawValue = attr.isSpec
+    ? (product.specs as any)?.[attr.id]
     : (product as any)?.[attr.id];
 
   if (!rawValue) return false;
 
-  const rawLower = String(rawValue).toLowerCase().trim();
-
-  // 1. Direct match
-  if (rawLower === targetLower) return true;
-
-  // 2. Comma, pipe or dash separated values (e.g. 'S - M - L' or 'Cut | Roll')
-  if (rawLower.includes('|') || rawLower.includes(' - ') || rawLower.includes(',')) {
-    const parts = rawLower.split(/[|\-,]/).map(s => s.trim()).filter(Boolean);
-    if (parts.some(p => p === targetLower || p.startsWith(targetLower) || targetLower.startsWith(p))) {
-      return true;
-    }
-  }
-
-  // 3. Substring/prefix token match (e.g. 'S' matching 'S – 15mm')
-  if (rawLower.startsWith(targetLower) || targetLower.startsWith(rawLower)) {
-    return true;
-  }
-
-  return false;
+  const target = normalizeValue(targetValue).toLowerCase();
+  return splitValues(rawValue).some(p => p.toLowerCase() === target);
 }
 
 /**
@@ -126,27 +128,21 @@ export default function DynamicProductFilters({
     const map = new Map<string, FilterOptionData[]>();
 
     categoryAttributes.forEach(attr => {
-      // 1. Gather all unique candidate values for this attribute
-      const candidateSet = new Set<string>();
+            // 1. Gom giá trị duy nhất (đã tách + chuẩn hóa + bỏ trùng không phân biệt hoa thường)
+      const normalizedOptions = (attr.options || []).flatMap(o => splitValues(o));
+      const candidateMap = new Map<string, string>();
+      const addCandidate = (v: unknown) =>
+        splitValues(v).forEach(part => {
+          const key = part.toLowerCase();
+          if (!candidateMap.has(key)) candidateMap.set(key, part);
+        });
 
-      // Prefer predefined schema options if present
-      if (attr.options && attr.options.length > 0) {
-        attr.options.forEach(opt => candidateSet.add(opt));
-      }
+      (attr.options || []).forEach(addCandidate);
+      categoryBaseProducts.forEach(p =>
+        addCandidate(attr.isSpec ? (p.specs as any)?.[attr.id] : (p as any)?.[attr.id])
+      );
 
-      // Also harvest any values present in the actual products of this category
-      categoryBaseProducts.forEach(p => {
-        const raw = attr.isSpec ? (p.specs as any)?.[attr.id] : (p as any)?.[attr.id];
-        if (raw) {
-          if (typeof raw === 'string' && (raw.includes('|') || raw.includes(' - ') || raw.includes(','))) {
-            raw.split(/[|\-,]/).map(s => s.trim()).filter(Boolean).forEach(part => candidateSet.add(part));
-          } else {
-            candidateSet.add(String(raw).trim());
-          }
-        }
-      });
-
-      const candidateValues = Array.from(candidateSet);
+      const candidateValues = Array.from(candidateMap.values());
       if (candidateValues.length === 0) return;
 
       // 2. Filter products by all OTHER selected attributes (faceting rule)
@@ -176,19 +172,15 @@ export default function DynamicProductFilters({
       });
 
       // Sort: available options first, then preserve schema order or alphabetical
-      optionsData.sort((a, b) => {
+           optionsData.sort((a, b) => {
         if (a.disabled !== b.disabled) return a.disabled ? 1 : -1;
-        if (attr.options) {
-          const indexA = attr.options.indexOf(a.value);
-          const indexB = attr.options.indexOf(b.value);
-          if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-        }
-        return a.label.localeCompare(b.label);
+        const indexA = normalizedOptions.indexOf(a.value);
+        const indexB = normalizedOptions.indexOf(b.value);
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+        return a.label.localeCompare(b.label, 'vi', { numeric: true });
       });
-
       map.set(attr.id, optionsData);
     });
-
     return map;
   }, [categoryAttributes, categoryBaseProducts, selectedFilters]);
 
@@ -280,4 +272,4 @@ export default function DynamicProductFilters({
     ) : null}
   </div>
   );
-}
+} 

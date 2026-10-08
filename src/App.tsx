@@ -38,10 +38,10 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
-              <Route path="collections" element={<Navigate to="/collections/all" replace />} />
+              <Route path="collections" element={<Navigate to="/catalog" replace />} />
               <Route path="collections/:collectionSlug" element={<Catalog />} />
               {/* Link cũ /products (không có slug) -> chuyển sang trang tất cả sản phẩm */}
-              <Route path="products" element={<Navigate to="/collections/all" replace />} />
+              <Route path="products" element={<Navigate to="/catalog" replace />} />
               <Route path="products/:id" element={<ProductDetail />} />
               {/* Link cũ /product/:id -> tự chuyển sang /products/:id */}
               <Route path="product/:id" element={<RedirectToNewProduct />} />
