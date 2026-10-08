@@ -15,7 +15,7 @@ import {
 import { doesProductMatchFilters } from './filters/DynamicProductFilters';
 import { SelectedFiltersState } from '../types/filter';
 import { toSlug } from '../utils';
-import { ArrowUpDown, RefreshCw } from 'lucide-react';
+import { ArrowUpDown } from 'lucide-react';
 
 interface ProductsSectionProps {
   onAddToCart: (product: Product) => void;
@@ -31,10 +31,16 @@ export default function ProductsSection({
   compareList,
   collectionSlug
 }: ProductsSectionProps) {
-  const { products, loading, refreshProducts } = useProducts();
+  const { products, loading } = useProducts();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
+  // Lấy bản dịch từ LanguageContext; nếu chưa có khóa thì dùng chữ dự phòng, không bao giờ hiện tên khóa
+  const tr = (key: string, vi: string, en: string): string => {
+    const v = t(key);
+    return v && v !== key ? v : language === 'en' ? en : vi;
+  };
+
 
   // Chuyển slug trong URL -> tên category thật (khớp theo schema, hoặc theo dữ liệu sản phẩm)
   const resolveCategoryFromSlug = useCallback((slug: string): string | null => {
@@ -175,10 +181,9 @@ export default function ProductsSection({
         {/* Header & Controls Area */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8 border-b border-zinc-200 pb-5">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="h-2 w-2 rounded-full bg-brand-green"></span>
+            <div className="mb-1">
               <span className="text-xs font-semibold tracking-wider text-zinc-500 uppercase">
-                {selectedCategory || 'Tất cả danh mục'}
+                {selectedCategory || tr('catalog.allCategories', 'Tất cả danh mục', 'All categories')}
               </span>
             </div>
             
@@ -187,23 +192,11 @@ export default function ProductsSection({
             </h2>
           </div>
           
-          
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-            <button 
-              type="button"
-              onClick={() => refreshProducts()}
-              disabled={loading}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 rounded-lg text-xs font-medium text-zinc-700 transition-colors disabled:opacity-60 cursor-pointer shadow-2xs"
-              title="Cập nhật lại dữ liệu mới nhất từ Supabase"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 text-brand-green ${loading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Làm mới dữ liệu</span>
-            </button>
-
             <div className="flex items-center gap-2 bg-zinc-50 px-3 py-1.5 border border-zinc-200 rounded-lg">
               <ArrowUpDown className="w-3.5 h-3.5 text-zinc-400" />
               <label htmlFor="sort-select" className="text-xs font-medium text-zinc-500 hidden sm:inline">
-                Sắp xếp:
+                {tr('catalog.sortLabel', 'Sắp xếp:', 'Sort by:')}
               </label>
               <select 
                 id="sort-select"
@@ -211,9 +204,9 @@ export default function ProductsSection({
                 onChange={(e) => setSortBy(e.target.value)}
                 className="bg-transparent text-xs font-semibold text-zinc-700 focus:outline-none cursor-pointer"
               >
-                <option value="default">Mặc định</option>
-                <option value="name-asc">Tên sản phẩm: A → Z</option>
-                <option value="name-desc">Tên sản phẩm: Z → A</option>
+                <option value="default">{tr('catalog.sortDefault', 'Mặc định', 'Default')}</option>
+                <option value="name-asc">{tr('catalog.sortNameAsc', 'Tên sản phẩm: A → Z', 'Product name: A → Z')}</option>
+                <option value="name-desc">{tr('catalog.sortNameDesc', 'Tên sản phẩm: Z → A', 'Product name: Z → A')}</option>
               </select>
             </div>
           </div>
