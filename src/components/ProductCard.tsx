@@ -3,6 +3,7 @@ import { Heart, Repeat, Search, X, FileText, ArrowRight } from 'lucide-react';
 import { Product } from '../types';
 import { Link } from 'react-router-dom';
 import { convertDriveUrl } from '../utils';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface ProductCardProps {
   product: Product;
@@ -11,14 +12,19 @@ interface ProductCardProps {
   isCompared: boolean;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ 
-  product, 
-  onAddToCart, 
-  onCompare, 
-  isCompared 
+const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  onAddToCart,
+  onCompare,
+  isCompared
 }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [showQuickView, setShowQuickView] = useState(false);
+  const { language, t } = useLanguage();
+
+  // Tên sản phẩm: dùng name_en khi ở tiếng Anh và có dữ liệu, ngược lại dùng tên gốc
+  const displayName: string =
+    (language === 'en' && (product as any).name_en) || product.name;
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -40,18 +46,18 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   return (
     <>
-      <div 
+      <div
         className="group relative flex flex-col justify-between bg-white border border-zinc-200 hover:border-zinc-300 hover:shadow-md transition-all p-3 sm:p-4 h-full"
       >
         {/* Top: Image Section with 3 Action Buttons */}
         <div className="relative aspect-[4/5] bg-white overflow-hidden flex items-center justify-center mb-3">
-          <Link 
+          <Link
             to={`/product/${product.id}`}
             className="w-full h-full flex items-center justify-center"
           >
             <img
               src={convertDriveUrl(product.image)}
-              alt={product.name}
+              alt={displayName}
               onError={(e) => {
                 e.currentTarget.src = 'https://placehold.co/400x500/f4f5f7/007a3d?text=Suzuki+Latex';
               }}
@@ -65,13 +71,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <button
               type="button"
               onClick={handleToggleFavorite}
-              title={isFavorite ? "Bỏ yêu thích" : "Yêu thích"}
+              title={isFavorite ? t('productCard.unfavorite') : t('productCard.favorite')}
               className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-[#007a3d] hover:bg-[#006331] transition-colors text-white cursor-pointer shadow-2xs"
             >
-              <Heart 
+              <Heart
                 className={`w-4 h-4 transition-transform active:scale-125 ${
                   isFavorite ? 'fill-white text-white' : 'text-white'
-                }`} 
+                }`}
               />
             </button>
 
@@ -79,13 +85,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <button
               type="button"
               onClick={handleToggleCompare}
-              title={isCompared ? "Bỏ so sánh" : "So sánh sản phẩm"}
+              title={isCompared ? t('productCard.uncompare') : t('productCard.compare')}
               className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-[#007a3d] hover:bg-[#006331] transition-colors cursor-pointer shadow-2xs"
             >
-              <Repeat 
+              <Repeat
                 className={`w-4 h-4 transition-colors ${
                   isCompared ? 'text-red-500 stroke-[2.5]' : 'text-white stroke-[2]'
-                }`} 
+                }`}
               />
             </button>
 
@@ -93,7 +99,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <button
               type="button"
               onClick={handleOpenQuickView}
-              title="Xem nhanh thông tin"
+              title={t('productCard.quickView')}
               className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-[#007a3d] hover:bg-[#006331] transition-colors text-white cursor-pointer shadow-2xs"
             >
               <Search className="w-4 h-4 text-white stroke-[2]" />
@@ -103,16 +109,16 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Content: Title, Price & Button */}
         <div className="flex flex-col flex-1 text-left">
-          <Link 
+          <Link
             to={`/product/${product.id}`}
             className="font-bold text-zinc-900 text-sm sm:text-base leading-snug hover:text-[#007a3d] transition-colors line-clamp-2 mb-2"
-            title={product.name}
+            title={displayName}
           >
-            {product.name}
+            {displayName}
           </Link>
 
           <p className="text-[#007a3d] font-bold text-base sm:text-lg mb-3">
-            Liên hệ
+            {t('productCard.contact')}
           </p>
 
           {/* Full-width "Xem chi tiết" Button */}
@@ -121,7 +127,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
               to={`/product/${product.id}`}
               className="block w-full py-2 px-4 bg-[#007a3d] hover:bg-[#006331] text-white font-bold text-sm text-center transition-colors"
             >
-              Xem chi tiết
+              {t('productCard.viewDetails')}
             </Link>
           </div>
         </div>
@@ -129,11 +135,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
       {/* Quick View Modal (Triggered by Search Icon) */}
       {showQuickView && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-in fade-in duration-200"
           onClick={() => setShowQuickView(false)}
         >
-          <div 
+          <div
             className="relative w-full max-w-2xl bg-white border border-zinc-200 shadow-2xl p-6 overflow-hidden max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
@@ -142,7 +148,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
               type="button"
               onClick={() => setShowQuickView(false)}
               className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-700 p-1.5 transition-colors cursor-pointer"
-              title="Đóng"
+              title={t('productCard.close')}
             >
               <X className="w-5 h-5" />
             </button>
@@ -152,7 +158,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
               <div className="aspect-square bg-zinc-50 border border-zinc-100 flex items-center justify-center p-4">
                 <img
                   src={convertDriveUrl(product.image)}
-                  alt={product.name}
+                  alt={displayName}
                   className="max-h-full max-w-full object-contain"
                 />
               </div>
@@ -163,21 +169,21 @@ const ProductCard: React.FC<ProductCardProps> = ({
                   {product.brand}
                 </span>
                 <h3 className="text-xl font-bold text-zinc-900 mb-2">
-                  {product.name}
+                  {displayName}
                 </h3>
                 {product.sku && (
                   <p className="text-xs text-zinc-500 font-mono mb-2">
-                    Mã SKU: {product.sku}
+                    {t('productCard.sku')}: {product.sku}
                   </p>
                 )}
                 <p className="text-xl font-bold text-[#007a3d] mb-4">
-                  Giá: Liên hệ
+                  {t('productCard.price')}: {t('productCard.contact')}
                 </p>
 
                 {/* Specs List */}
                 <div className="border border-zinc-200 text-xs mb-6 overflow-hidden">
                   <div className="bg-zinc-100 px-3 py-1.5 font-bold text-zinc-700 border-b border-zinc-200">
-                    Thông số kỹ thuật
+                    {t('productCard.specs')}
                   </div>
                   <div className="divide-y divide-zinc-100 max-h-48 overflow-y-auto">
                     {Object.entries(product.specs)
@@ -204,14 +210,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
                     className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-brand-yellow hover:bg-yellow-400 text-zinc-900 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
                   >
                     <FileText className="w-4 h-4" />
-                    <span>Thêm vào báo giá</span>
+                    <span>{t('productCard.addToQuote')}</span>
                   </button>
                   <Link
                     to={`/product/${product.id}`}
                     onClick={() => setShowQuickView(false)}
                     className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-[#007a3d] hover:bg-[#006331] text-white font-bold text-xs uppercase tracking-wider transition-colors text-center"
                   >
-                    <span>Xem chi tiết</span>
+                    <span>{t('productCard.viewDetails')}</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                 </div>
